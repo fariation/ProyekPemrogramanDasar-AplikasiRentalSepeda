@@ -1,13 +1,12 @@
 #include "Register.h"
 #include <iostream>
-#include <limits> // untuk numeric_limits
+#include <limits>
 using namespace std;
 
 void Registrasi::registrasiMahasiswa()
 {
     string Nama, NIM, Fakultas, Telepon;
 
-    // Bersihkan buffer
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     cout << "Nama: ";
@@ -107,13 +106,6 @@ void Registrasi::hapusDataMahasiswa()
 
 void Registrasi::peminjamanSepeda()
 {
-    if (sepedaSedangDipinjam)
-    {
-        cout << "Sepeda sedang dipinjam (Nomor: " << sepedaDipinjamNomor
-             << ", Tanggal: " << sepedaTanggalPinjam << ")\n";
-        return;
-    }
-
     string nim;
     cout << "Masukkan NIM peminjam: ";
     cin >> nim;
@@ -134,39 +126,78 @@ void Registrasi::peminjamanSepeda()
         return;
     }
 
-    cout << "Masukkan nomor sepeda: ";
-    cin >> sepedaDipinjamNomor;
+    int nomor;
+    cout << "Masukkan nomor sepeda (1-1000): ";
+    cin >> nomor;
 
+    if (nomor < 1 || nomor > 1000)
+    {
+        cout << "Nomor sepeda tidak valid!\n";
+        return;
+    }
+
+    for (auto &s : daftarSepeda)
+    {
+        if (s.nomor == nomor)
+        {
+            if (s.dipinjam)
+            {
+                cout << "Sepeda sudah dipinjam!\n";
+                return;
+            }
+
+            string tgl;
+            cout << "Masukkan tanggal peminjaman (DD/MM/YY): ";
+            cin >> tgl;
+
+            s.dipinjam = true;
+            s.nimPeminjam = nim;
+            s.tanggalPinjam = tgl;
+
+            cout << "Sepeda " << nomor << " berhasil dipinjam!\n";
+            return;
+        }
+    }
+
+    string tgl;
     cout << "Masukkan tanggal peminjaman (DD/MM/YY): ";
-    cin >> sepedaTanggalPinjam;
+    cin >> tgl;
 
-    sepedaSedangDipinjam = true;
+    Sepeda s;
+    s.nomor = nomor;
+    s.dipinjam = true;
+    s.nimPeminjam = nim;
+    s.tanggalPinjam = tgl;
 
-    cout << "Sepeda " << sepedaDipinjamNomor
-         << " berhasil dipinjam!\n";
+    daftarSepeda.push_back(s);
+
+    cout << "Sepeda " << nomor << " berhasil dipinjam!\n";
 }
 
 void Registrasi::pengembalianSepeda()
 {
-    if (!sepedaSedangDipinjam)
-    {
-        cout << "Tidak ada sepeda yang sedang dipinjam.\n";
-        return;
-    }
-
-    string nomor;
+    int nomor;
     cout << "Masukkan nomor sepeda yang dikembalikan: ";
     cin >> nomor;
 
-    if (nomor != sepedaDipinjamNomor)
+    for (auto &s : daftarSepeda)
     {
-        cout << "Nomor sepeda tidak cocok!\n";
-        return;
+        if (s.nomor == nomor)
+        {
+            if (!s.dipinjam)
+            {
+                cout << "Sepeda ini tidak sedang dipinjam.\n";
+                return;
+            }
+
+            s.dipinjam = false;
+            s.nimPeminjam = "";
+            s.tanggalPinjam = "";
+
+            cout << "Sepeda berhasil dikembalikan.\n";
+            return;
+        }
     }
 
-    sepedaSedangDipinjam = false;
-    sepedaDipinjamNomor = "";
-    sepedaTanggalPinjam = "";
-
-    cout << "Sepeda berhasil dikembalikan.\n";
+    cout << "Sepeda tidak terdaftar!\n";
 }
